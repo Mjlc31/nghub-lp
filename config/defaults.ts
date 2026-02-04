@@ -1,7 +1,7 @@
 export const INITIAL_CONFIG = {
     images: {
-        hero: "/NG-149.jpg",
-        quoteParallax: "/NG-149.jpg",
+        hero: "/NG-141.jpg",
+        quoteParallax: "/NG-141.jpg",
         gallery: [
             "/NG-355.jpg",
             "/NG-392.jpg",
