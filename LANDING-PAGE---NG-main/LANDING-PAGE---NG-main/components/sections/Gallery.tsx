@@ -43,12 +43,14 @@ export const Gallery: React.FC<GalleryProps> = ({ images, colors, scrollToApply 
                         primaryColor={colors.primary}
                     />
 
-                    <MarqueeColumn
-                        images={column2Images.length > 0 ? column2Images : images.gallery}
-                        direction="down"
-                        speed={12}
-                        primaryColor={colors.primary}
-                    />
+                    <div className="hidden md:block">
+                        <MarqueeColumn
+                            images={column2Images.length > 0 ? column2Images : images.gallery}
+                            direction="down"
+                            speed={12}
+                            primaryColor={colors.primary}
+                        />
+                    </div>
                 </div>
 
             </div>

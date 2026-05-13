@@ -56,6 +56,8 @@ export const Hero: React.FC<HeroProps> = ({ images, texts, colors, scrollToApply
                     src={images.hero}
                     className="w-full h-full object-cover opacity-50"
                     alt="Diretores NGHUB"
+                    loading="eager"
+                    decoding="sync"
                 />
             </motion.div>
 
@@ -68,7 +70,8 @@ export const Hero: React.FC<HeroProps> = ({ images, texts, colors, scrollToApply
             >
                 <motion.h1
                     variants={itemVariants}
-                    className="text-4xl md:text-7xl lg:text-8xl font-serif text-white mb-8 md:mb-10 leading-[1.1] md:leading-[1] tracking-tight whitespace-pre-line drop-shadow-2xl"
+                    className="text-5xl md:text-7xl lg:text-8xl font-serif text-white mb-8 md:mb-10 leading-[1.1] md:leading-[1] tracking-tight whitespace-pre-line"
+                    style={{ textShadow: '0 4px 20px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6)' }}
                 >
                     {texts.heroTitle.split(' ').map((word, i) => {
                         const isHighlight = ['não', 'sabe', 'estagnado'].includes(word.toLowerCase().replace(/[.,]/g, ''));
@@ -91,7 +94,7 @@ export const Hero: React.FC<HeroProps> = ({ images, texts, colors, scrollToApply
                     <a
                         href="#apply"
                         onClick={scrollToApply}
-                        className="group relative px-8 py-3 md:px-12 md:py-5 overflow-hidden border rounded-sm transition-all duration-500 cursor-pointer hover:shadow-[0_0_30px_rgba(197,160,89,0.3)]"
+                        className="group relative px-10 py-4 md:px-12 md:py-5 overflow-hidden border rounded-sm transition-all duration-500 cursor-pointer hover:shadow-[0_0_30px_rgba(197,160,89,0.3)] min-h-[48px] flex items-center"
                         style={{ borderColor: `${colors.primary}60` }}
                     >
                         <div

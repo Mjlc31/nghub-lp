@@ -3,11 +3,12 @@ import { Shield, AlertTriangle } from 'lucide-react';
 import { getCurrentUser, signOut } from './services/supabase';
 
 import { LeadForm } from './components/LeadForm';
-import { AdminPanel } from './components/AdminPanel';
-import { Login } from './components/admin/Login';
 import { GlobalEffects } from './components/ui/Effects';
+import { CustomCursor } from './components/ui/CustomCursor';
+import { SoundController } from './components/ui/SoundController';
 import { Hero } from './components/sections/Hero';
 import { ManifestoTeaser, ManifestoModal } from './components/sections/Manifesto';
+import { MobileMenu } from './components/ui/MobileMenu';
 
 // Hooks
 import { useSiteConfig } from './hooks/useSiteConfig';
@@ -17,6 +18,8 @@ const Arsenal = React.lazy(() => import('./components/sections/Arsenal').then(mo
 const Gallery = React.lazy(() => import('./components/sections/Gallery').then(module => ({ default: module.Gallery })));
 const Footer = React.lazy(() => import('./components/sections/Footer').then(module => ({ default: module.Footer })));
 const ParallaxQuote = React.lazy(() => import('./components/sections/Footer').then(module => ({ default: module.ParallaxQuote })));
+const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(module => ({ default: module.AdminPanel })));
+const Login = React.lazy(() => import('./components/admin/Login').then(module => ({ default: module.Login })));
 
 // Loading Component
 const SectionLoader = () => (
@@ -32,16 +35,16 @@ const App: React.FC = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check Auth on Mount or URL Override
+  // Easter Egg & Auth Check
   useEffect(() => {
-    // 1. Check URL for ?admin=true (Developer Mode)
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('admin') === 'true') {
-      setIsAuthenticated(true);
-      setIsAdminOpen(true);
-    }
+    // Console Signature
+    console.log(
+      "%c NG HUB %c \n\nVocê parece curioso. Se estiver vendo isso, talvez deva nos chamar.\n\n",
+      "background: #C5A059; color: black; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-family: serif;",
+      "color: #C5A059; font-family: sans-serif;"
+    );
 
-    // 2. Check Supabase Session
+    // Check Supabase Session
     getCurrentUser().then(user => {
       if (user) setIsAuthenticated(true);
     });
@@ -68,8 +71,7 @@ const App: React.FC = () => {
     setIsAdminOpen(false);
   };
 
-  // Custom Hook (Assumes useSiteConfig handles Supabase logic internally now, or we pass it down)
-  // For now, let's stick to the existing hook but we will modify it to use Supabase later
+  // Custom Hook
   const { config, setConfig, resetConfig, saveError, setSaveError } = useSiteConfig();
 
   const scrollToApply = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -87,24 +89,28 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen font-sans bg-ng-black text-ng-white selection:bg-ng-gold selection:text-black relative">
       <GlobalEffects />
+      <CustomCursor />
+      <SoundController />
 
       {/* Auth & Admin Modals */}
-      {showLogin && (
-        <Login
-          onLoginSuccess={() => { setIsAuthenticated(true); setShowLogin(false); setIsAdminOpen(true); }}
-          onClose={() => setShowLogin(false)}
-        />
-      )}
+      <Suspense fallback={null}>
+        {showLogin && (
+          <Login
+            onLoginSuccess={() => { setIsAuthenticated(true); setShowLogin(false); setIsAdminOpen(true); }}
+            onClose={() => setShowLogin(false)}
+          />
+        )}
 
-      {isAdminOpen && isAuthenticated && (
-        <AdminPanel
-          config={config}
-          onUpdate={setConfig}
-          onReset={resetConfig}
-          hasSaveError={!!saveError}
-          onLogout={handleLogout}
-        />
-      )}
+        {isAdminOpen && isAuthenticated && (
+          <AdminPanel
+            config={config}
+            onUpdate={setConfig}
+            onReset={resetConfig}
+            hasSaveError={!!saveError}
+            onLogout={handleLogout}
+          />
+        )}
+      </Suspense>
 
       {/* Toast Warning */}
       {saveError && (
@@ -139,14 +145,11 @@ const App: React.FC = () => {
             Candidatar-me
           </a>
         </div>
-        <a
-          href="#apply"
-          onClick={scrollToApply}
-          className="md:hidden text-[10px] uppercase tracking-widest border px-3 py-1.5 rounded-sm"
-          style={{ color: colors.primary, borderColor: `${colors.primary}4D` }}
-        >
-          Candidatar-me
-        </a>
+        <MobileMenu
+          colors={colors}
+          setIsManifestoOpen={setIsManifestoOpen}
+          scrollToApply={scrollToApply}
+        />
       </nav>
 
       <Hero

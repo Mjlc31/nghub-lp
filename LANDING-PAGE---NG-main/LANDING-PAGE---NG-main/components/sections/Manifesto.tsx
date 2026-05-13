@@ -3,7 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Quote, FileText, ArrowRight, X, Users } from 'lucide-react';
 
 interface ManifestoProps {
-    texts: { manifestoTitle: string };
+    texts: {
+        manifestoTitle: string;
+        manifestoP1: string;
+        manifestoP2: string;
+        manifestoP3: string;
+        manifestoP4: string;
+        manifestoP5: string;
+        [key: string]: string; // Allow other keys
+    };
     colors: { primary: string };
     isManifestoOpen: boolean;
     setIsManifestoOpen: (isOpen: boolean) => void;
@@ -105,7 +113,8 @@ export const ManifestoModal: React.FC<ManifestoProps> = ({
                     {/* Close Button */}
                     <button
                         onClick={() => setIsManifestoOpen(false)}
-                        className="fixed md:absolute top-6 right-6 z-50 text-zinc-500 hover:text-white bg-black/50 backdrop-blur-md p-2 rounded-full border border-white/10 hover:border-white/30 transition-all group"
+                        className="fixed md:absolute top-6 right-6 z-50 text-zinc-500 hover:text-white bg-black/50 backdrop-blur-md p-3 rounded-full border border-white/10 hover:border-white/30 transition-all group min-w-[48px] min-h-[48px] flex items-center justify-center"
+                        aria-label="Fechar manifesto"
                     >
                         <X size={24} className="group-hover:rotate-90 transition-transform duration-500" />
                     </button>
@@ -155,19 +164,19 @@ export const ManifestoModal: React.FC<ManifestoProps> = ({
 
                             <div className="space-y-6 text-zinc-300 font-light leading-relaxed text-lg">
                                 <p>
-                                    Disseram que empreender era sobre "liberdade geográfica". Disseram que era sobre trabalhar na praia com um notebook. Disseram que o caminho era fácil, rápido e indolor.
+                                    {texts.manifestoP1}
                                 </p>
                                 <p className="text-white font-serif text-xl italic pl-6 border-l-2" style={{ borderColor: colors.primary }}>
-                                    Esqueça. Tudo isso é ruído.
+                                    {texts.manifestoP2}
                                 </p>
                                 <p>
-                                    A vida real não tem filtro de Instagram. A vida real tem cheiro de café frio às 23h da noite. A vida real é ter que demitir um pai de família olhando no olho dele, segurar o choro, e voltar para a sala de reunião para bater a meta porque a sua empresa depende disso.
+                                    {texts.manifestoP3}
                                 </p>
                                 <p>
-                                    O empreendedorismo não é um parque de diversões para adultos infantilizados. <strong className="text-white">É uma guerra.</strong> E na guerra, quem não tem técnica, morre.
+                                    <strong className="text-white">{texts.manifestoP4}</strong>
                                 </p>
                                 <p>
-                                    A NG.Hub nasceu porque cansamos de ver gente boa, gente com potencial, com garra, sendo seduzida pelo canto da sereia da mediocridade. Cansamos de ver "gurus" que nunca emitiram uma Nota Fiscal ensinando sobre gestão.
+                                    {texts.manifestoP5}
                                 </p>
 
                                 <div className="bg-white/5 p-8 rounded-sm border border-white/5 my-8">

@@ -12,11 +12,12 @@ export const useSiteConfig = () => {
     // Initial Load - Try Supabase first, fallback to LocalStorage, then Default
     useEffect(() => {
         const loadConfig = async () => {
-            // 1. Supabase Load Removed (LocalStorage Only)
-            const remoteConfig = null;
+            // 1. Try Supabase
+            const { data: remoteConfig } = await getSiteConfig();
 
             if (remoteConfig) {
-                // Unreachable, kept for structure
+                setConfig({ ...INITIAL_CONFIG, ...remoteConfig });
+                setIsLoaded(true);
                 return;
             }
 

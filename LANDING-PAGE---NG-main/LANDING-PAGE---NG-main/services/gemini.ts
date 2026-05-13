@@ -28,3 +28,31 @@ export const generateContent = async (prompt: string, modelName: string = "gemin
         throw error;
     }
 };
+
+export const classifyLead = async (leadData: {
+    niche: string;
+    revenue_range: string;
+    biggest_challenge: string;
+}) => {
+    const prompt = `
+    Atue como um qualificador de leads experiente para um ecossistema de alta performance (Mastermind/Business).
+    Use o seguinte contexto:
+    - Nicho: ${leadData.niche}
+    - Faturamento: ${leadData.revenue_range}
+    - Desafio: ${leadData.biggest_challenge}
+
+    Responda em formato curto (texto simples):
+    [SCORE 0-100] | [PERFIL: Iniciante, Promissor, Ideal, Whale] | [ANÁLISE EM UMA FRASE]
+    
+    Exemplo:
+    85 | Ideal | Faturamento consolidado e desafio de escala claro.
+    `;
+
+    try {
+        const result = await generateContent(prompt);
+        return result?.trim() || "Análise indisponível";
+    } catch (error) {
+        console.error("Erro ao classificar lead:", error);
+        return "Erro na análise de IA.";
+    }
+};

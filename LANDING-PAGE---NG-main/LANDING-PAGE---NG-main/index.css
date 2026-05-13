@@ -7,6 +7,36 @@
   .glass-card {
     @apply bg-white/[0.02] backdrop-blur-[20px] border border-white/[0.03] shadow-2xl;
   }
+
+  .mask-image-gradient {
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  }
+
+  /* Mobile Touch Optimizations */
+  @media (max-width: 768px) {
+
+    /* Remove tap highlight */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ensure minimum touch targets */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      min-height: 44px;
+    }
+  }
 }
 
 /* Base Styles */
@@ -18,22 +48,24 @@ body {
   background-color: #030303;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-}
+/* Custom Scrollbar (Desktop Only) */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
 
-::-webkit-scrollbar-track {
-  background: #050505;
-}
+  ::-webkit-scrollbar-track {
+    background: #050505;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 2px;
-}
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #C5A059;
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C5A059;
+  }
 }
 
 /* Noise Overlay */
@@ -58,5 +90,22 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 40;
+
   background: radial-gradient(circle at center, transparent 40%, #030303 120%);
+}
+
+/* Custom Cursor Hiding */
+@media (min-width: 768px) {
+  body {
+    cursor: none;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"] {
+    cursor: none;
+  }
 }

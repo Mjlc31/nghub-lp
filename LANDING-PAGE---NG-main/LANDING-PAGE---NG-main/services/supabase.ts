@@ -35,6 +35,11 @@ export interface SiteConfig {
     heroSubtitle: string;
     ctaButton: string;
     manifestoTitle: string;
+    manifestoP1: string;
+    manifestoP2: string;
+    manifestoP3: string;
+    manifestoP4: string;
+    manifestoP5: string;
   };
   colors: {
     primary: string;
@@ -70,14 +75,29 @@ export const updateLeadStatus = async (id: string, status: Lead['status']): Prom
 
 // --- CONFIG SERVICE ---
 
-// Config Service Removed - Using LocalStorage Only
+// Config Service - Supabase Real Implementation
 export const getSiteConfig = async (): Promise<{ data: SiteConfig | null; error: any }> => {
-  return { data: null, error: null };
+  const { data, error } = await supabase
+    .from('site_configs')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // PGRST116 is "Relation not found" or "No rows"
+    return { data: null, error };
+  }
+
+  return { data: data ? (data.config as SiteConfig) : null, error: null };
 };
 
-// Config Service Removed - Using LocalStorage Only
 export const saveSiteConfig = async (config: SiteConfig): Promise<{ error: any }> => {
-  return { error: null };
+  // We insert a new row for history/versioning, or you could update a single row with ID 1
+  const { error } = await supabase
+    .from('site_configs')
+    .insert([{ config }]);
+
+  return { error };
 };
 
 // --- AUTH SERVICE ---

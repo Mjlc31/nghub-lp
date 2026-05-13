@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, CheckCircle, AlertCircle, Lock, Send } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Lock, Send, ArrowRight, ArrowLeft } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/formatUtils';
 import { submitLead } from '../services/supabase';
+import { classifyLead } from '../services/gemini';
 
 interface LeadFormProps {
   endpoint?: string;
@@ -95,6 +96,7 @@ const SelectField = ({
 );
 
 export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     full_name: '',
     whatsapp: '',
@@ -105,6 +107,23 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const handleNextStep = () => {
+    if (!formData.full_name || !formData.whatsapp || !formData.instagram) {
+      setErrorMessage('Por favor, preencha todos os campos antes de continuar.');
+      setStatus('error');
+      return;
+    }
+    setErrorMessage('');
+    setStatus('idle');
+    setStep(2);
+  };
+
+  const handlePrevStep = () => {
+    setErrorMessage('');
+    setStatus('idle');
+    setStep(1);
+  };
 
 
 
@@ -122,10 +141,25 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
     setStatus('loading');
     setErrorMessage('');
 
+    // AI Enrichment
+    let aiAnalysis = '';
+    try {
+      aiAnalysis = await classifyLead({
+        niche: formData.niche,
+        revenue_range: formData.revenue_range,
+        biggest_challenge: formData.biggest_challenge
+      });
+    } catch (e) {
+      console.warn("AI Classification failed", e);
+    }
+
     // If no endpoint is configured, try Supabase
     if (!endpoint) {
       try {
-        const { error } = await submitLead(formData);
+        const { error } = await submitLead({
+          ...formData,
+          notes: aiAnalysis // Add AI analysis to notes
+        });
         if (error) throw error;
 
         setStatus('success');
@@ -145,6 +179,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
     try {
       const payload = {
         ...formData,
+        notes: aiAnalysis, // Add AI analysis to payload
         created_at: new Date().toISOString(),
         source: 'Landing Page'
       };
@@ -210,7 +245,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-ng-gold/40 to-transparent" />
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-ng-gold/20 to-transparent" />
 
-        <div className="text-center mb-8 md:mb-16">
+        <div className="text-center mb-8 md:mb-12">
           <div className="inline-flex items-center gap-2 md:gap-3 border border-ng-gold/20 px-4 py-1.5 md:px-6 md:py-2 rounded-full bg-ng-gold/5 mb-6 md:mb-8">
             <Lock className="w-3 h-3 text-ng-gold" />
             <span className="text-[9px] md:text-[10px] uppercase tracking-[0.25em] text-ng-gold">Área de Seleção Exclusiva</span>
@@ -219,70 +254,148 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
           <p className="text-zinc-500 font-light text-xs md:text-sm">Preencha com precisão. O ecossistema não tolera amadores.</p>
         </div>
 
-        <div className="space-y-6 md:space-y-8">
-          <InputField
-            label="Nome Completo"
-            name="full_name"
-            value={formData.full_name}
-            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-            placeholder="Seu nome oficial"
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <InputField
-              label="WhatsApp"
-              name="whatsapp"
-              value={formData.whatsapp}
-              onChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'whatsapp' } })}
-              placeholder="(00) 00000-0000"
-            />
-            <InputField
-              label="Instagram"
-              name="instagram"
-              value={formData.instagram}
-              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-              placeholder="@seu.perfil"
-            />
+        {/* Progress Indicator */}
+        <div className="flex justify-center mb-8 relative">
+          <div className="flex items-center gap-2 relative z-10">
+            <div className={`w-12 h-1 rounded-full transition-colors duration-300 ${step >= 1 ? 'bg-ng-gold' : 'bg-white/10'}`} />
+            <div className={`w-12 h-1 rounded-full transition-colors duration-300 ${step >= 2 ? 'bg-ng-gold' : 'bg-white/10'}`} />
           </div>
+          <span className="absolute top-4 text-[9px] text-zinc-500 uppercase tracking-widest text-center w-full">
+            Passo {step} de 2
+          </span>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <InputField
-              label="Nicho de Atuação"
-              name="niche"
-              value={formData.niche}
-              onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
-              placeholder="Ex: Vendas, SaaS, Medicina..."
-            />
+        <div className="relative min-h-[350px]">
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6 md:space-y-8 absolute w-full top-0"
+              >
+                <InputField
+                  label="Nome Completo"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  placeholder="Seu nome oficial"
+                />
 
-            <SelectField
-              label="Faturamento Mensal"
-              name="revenue_range"
-              value={formData.revenue_range}
-              onChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'revenue_range' } })}
-              options={[
-                "Estou começando (< R$ 10k)",
-                "Tracionando (R$ 10k - R$ 50k)",
-                "Escalando (R$ 50k - R$ 100k)",
-                "Consolidado (R$ 100k - R$ 500k)",
-                "High Stakes (R$ 500k+)"
-              ]}
-            />
-          </div>
+                <div className="grid grid-cols-1 gap-6 md:gap-8">
+                  <div>
+                    <InputField
+                      label="WhatsApp"
+                      name="whatsapp"
+                      value={formData.whatsapp}
+                      onChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'whatsapp' } })}
+                      placeholder="(00) 00000-0000"
+                    />
+                    <p className="text-[9px] text-zinc-600 mt-2 ml-1">Usaremos apenas para contato sobre a aplicação.</p>
+                  </div>
+                  
+                  <InputField
+                    label="Instagram"
+                    name="instagram"
+                    value={formData.instagram}
+                    onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                    placeholder="@seu.perfil"
+                  />
+                </div>
+                
+                <div className="pt-4">
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    className="w-full group bg-white/5 hover:bg-white/10 border border-white/10 text-white font-serif font-bold py-5 md:py-6 px-8 transition-all duration-300 uppercase tracking-widest text-[10px] md:text-xs relative overflow-hidden"
+                  >
+                    <span className="flex items-center justify-center gap-3 relative z-10">
+                      Continuar Aplicação <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
 
-          <div className="flex flex-col space-y-2 md:space-y-3 group">
-            <label className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-medium ml-1 transition-colors group-hover:text-ng-gold/70">
-              Qual seu maior desafio hoje?
-            </label>
-            <textarea
-              name="biggest_challenge"
-              required
-              value={formData.biggest_challenge}
-              onChange={(e) => setFormData({ ...formData, biggest_challenge: e.target.value })}
-              placeholder="Seja honesto. O que está travando seu crescimento?"
-              rows={2}
-              className="bg-white/5 border-b border-white/10 focus:border-ng-gold text-zinc-200 placeholder-zinc-700 px-4 py-3 md:py-4 outline-none transition-all duration-500 font-sans text-sm rounded-t-sm resize-none focus:bg-white/10 w-full"
-            />
-          </div>
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6 md:space-y-8 absolute w-full top-0"
+              >
+                <div className="grid grid-cols-1 gap-6 md:gap-8">
+                  <InputField
+                    label="Nicho de Atuação"
+                    name="niche"
+                    value={formData.niche}
+                    onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
+                    placeholder="Ex: Vendas, SaaS, Medicina..."
+                  />
+
+                  <SelectField
+                    label="Faturamento Mensal"
+                    name="revenue_range"
+                    value={formData.revenue_range}
+                    onChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'revenue_range' } })}
+                    options={[
+                      "Estou começando (< R$ 10k)",
+                      "Tracionando (R$ 10k - R$ 50k)",
+                      "Escalando (R$ 50k - R$ 100k)",
+                      "Consolidado (R$ 100k - R$ 500k)",
+                      "High Stakes (R$ 500k+)"
+                    ]}
+                  />
+                </div>
+
+                <div className="flex flex-col space-y-2 md:space-y-3 group">
+                  <label className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-medium ml-1 transition-colors group-hover:text-ng-gold/70">
+                    Qual seu maior desafio hoje?
+                  </label>
+                  <textarea
+                    name="biggest_challenge"
+                    required
+                    value={formData.biggest_challenge}
+                    onChange={(e) => setFormData({ ...formData, biggest_challenge: e.target.value })}
+                    placeholder="Seja honesto. O que está te impedindo de escalar para o próximo nível?"
+                    rows={4}
+                    className="bg-white/5 border-b border-white/10 focus:border-ng-gold text-zinc-200 placeholder-zinc-700 px-4 py-3 md:py-4 outline-none transition-all duration-500 font-sans text-sm rounded-t-sm resize-none focus:bg-white/10 w-full min-h-[100px]"
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    className="group bg-transparent border border-white/10 hover:border-white/20 text-zinc-400 hover:text-white py-5 px-6 transition-all duration-300"
+                  >
+                    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    className="flex-1 group bg-gradient-to-r from-ng-gold to-ng-gold-light hover:to-white text-ng-black font-serif font-bold py-5 md:py-6 px-8 transition-all duration-500 uppercase tracking-widest text-[10px] md:text-xs disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(197,160,89,0.2)] hover:shadow-[0_0_50px_rgba(197,160,89,0.5)] relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                    {status === 'loading' ? (
+                      <span className="flex items-center justify-center gap-2 relative z-10">
+                        <Loader2 className="animate-spin w-4 h-4" /> Processando...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-3 relative z-10">
+                        Finalizar e Enviar <Send size={14} className="group-hover:translate-x-1 transition-transform" />
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <AnimatePresence>
@@ -291,30 +404,13 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="bg-red-900/10 border border-red-900/30 p-4 flex items-center gap-3 text-red-400 text-xs justify-center"
+              className="bg-red-900/10 border border-red-900/30 p-4 flex items-center gap-3 text-red-400 text-xs justify-center relative z-20 mt-8"
             >
               <AlertCircle size={14} />
               <span>{errorMessage}</span>
             </motion.div>
           )}
         </AnimatePresence>
-
-        <button
-          type="submit"
-          disabled={status === 'loading'}
-          className="w-full group bg-gradient-to-r from-ng-gold to-ng-gold-light hover:to-white text-ng-black font-serif font-bold py-5 md:py-6 px-8 transition-all duration-500 uppercase tracking-widest text-[10px] md:text-xs disabled:opacity-50 disabled:cursor-not-allowed mt-8 shadow-[0_0_30px_rgba(197,160,89,0.2)] hover:shadow-[0_0_50px_rgba(197,160,89,0.5)] relative overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-          {status === 'loading' ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="animate-spin w-4 h-4" /> Processando...
-            </span>
-          ) : (
-            <span className="flex items-center justify-center gap-3 relative z-10">
-              Solicitar Acesso ao Ecossistema <Send size={14} className="group-hover:translate-x-1 transition-transform" />
-            </span>
-          )}
-        </button>
 
         <p className="text-center text-zinc-700 text-[10px] leading-relaxed mt-6">
           Seus dados estão protegidos. Aplicação sujeita a análise de comitê.

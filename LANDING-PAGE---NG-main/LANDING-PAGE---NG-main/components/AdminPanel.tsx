@@ -391,6 +391,51 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
                         <AIButton field="manifestoTitle" context="Título polêmico para um manifesto de vendas" />
                       </div>
                     </InputGroup>
+
+                    <InputGroup label="Parágrafo 1 (Intro)">
+                      <textarea
+                        value={config.texts.manifestoP1}
+                        onChange={(e) => updateText('manifestoP1', e.target.value)}
+                        rows={3}
+                        className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 focus:bg-black/60 outline-none transition-all resize-none font-light leading-relaxed"
+                      />
+                    </InputGroup>
+
+                    <InputGroup label="Parágrafo 2 (Destaque)">
+                      <textarea
+                        value={config.texts.manifestoP2}
+                        onChange={(e) => updateText('manifestoP2', e.target.value)}
+                        rows={2}
+                        className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 focus:bg-black/60 outline-none transition-all resize-none font-light leading-relaxed"
+                      />
+                    </InputGroup>
+
+                    <InputGroup label="Parágrafo 3 (Realidade)">
+                      <textarea
+                        value={config.texts.manifestoP3}
+                        onChange={(e) => updateText('manifestoP3', e.target.value)}
+                        rows={4}
+                        className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 focus:bg-black/60 outline-none transition-all resize-none font-light leading-relaxed"
+                      />
+                    </InputGroup>
+
+                    <InputGroup label="Parágrafo 4 (Guerra)">
+                      <textarea
+                        value={config.texts.manifestoP4}
+                        onChange={(e) => updateText('manifestoP4', e.target.value)}
+                        rows={2}
+                        className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 focus:bg-black/60 outline-none transition-all resize-none font-light leading-relaxed"
+                      />
+                    </InputGroup>
+
+                    <InputGroup label="Parágrafo 5 (Conclusão)">
+                      <textarea
+                        value={config.texts.manifestoP5}
+                        onChange={(e) => updateText('manifestoP5', e.target.value)}
+                        rows={4}
+                        className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 focus:bg-black/60 outline-none transition-all resize-none font-light leading-relaxed"
+                      />
+                    </InputGroup>
                   </div>
                 )}
 
