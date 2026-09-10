@@ -47,9 +47,7 @@ export const submitLead = async (
     pain_point: leadData.biggest_challenge,
     stage: 'Novo Lead',
     origin: 'Landing Page NGHUB',
-    pipeline: 'Geral',
-    form_answers: {},
-    source_tags: ['landing-page'],
+    pipeline: 'Geral'
   };
 
   const { error } = await supabase
