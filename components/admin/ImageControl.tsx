@@ -1,7 +1,7 @@
 import React from 'react';
 import { Upload, Loader2 } from 'lucide-react';
 
-interface ImageControlProps {
+export interface ImageControlProps {
     label: string;
     src: string;
     onUpload: () => void;
@@ -53,7 +53,11 @@ export const ImageControl: React.FC<ImageControlProps> = ({
     </div>
 );
 
-export const SectionTitle = ({ children }: { children?: React.ReactNode }) => (
+export interface SectionTitleProps {
+    children?: React.ReactNode;
+}
+
+export const SectionTitle = ({ children }: SectionTitleProps): React.JSX.Element => (
     <div className="flex items-center gap-3 mb-4 mt-6 first:mt-0">
         <h4 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] shrink-0">
             {children}
@@ -62,7 +66,12 @@ export const SectionTitle = ({ children }: { children?: React.ReactNode }) => (
     </div>
 );
 
-export const InputGroup = ({ label, children }: { label: string, children?: React.ReactNode }) => (
+export interface InputGroupProps {
+    label: string;
+    children?: React.ReactNode;
+}
+
+export const InputGroup = ({ label, children }: InputGroupProps): React.JSX.Element => (
     <div className="space-y-2 mb-4">
         <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-medium block">{label}</label>
         {children}

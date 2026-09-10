@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Lock, Loader2, AlertCircle } from 'lucide-react';
 import { signIn } from '../../services/supabase';
 
-interface LoginProps {
+export interface LoginProps {
     onLoginSuccess: () => void;
     onClose: () => void;
 }
@@ -31,7 +31,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onClose }) => {
     };
 
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -95,6 +95,6 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess, onClose }) => {
                     </button>
                 </form>
             </div>
-        </motion.div>
+        </m.div>
     );
 };

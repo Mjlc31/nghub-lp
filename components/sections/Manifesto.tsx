@@ -1,218 +1,329 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Quote, FileText, ArrowRight, X, Users } from 'lucide-react';
+import React, { useEffect, useCallback } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
+import { FileText, ArrowRight, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { useSiteConfig } from '../../context/SiteConfigContext';
 
-interface ManifestoProps {
-    texts: { manifestoTitle: string };
-    colors: { primary: string };
-    isManifestoOpen: boolean;
-    setIsManifestoOpen: (isOpen: boolean) => void;
-    manifestoImage: string;
+export interface ManifestoProps {
+  texts?: { manifestoTitle: string };
+  colors?: { primary: string };
+  isManifestoOpen: boolean;
+  setIsManifestoOpen: (isOpen: boolean) => void;
+  manifestoImage?: string;
+  brandMark?: string;
+  quote?: string;
 }
 
-export const ManifestoTeaser: React.FC<Pick<ManifestoProps, 'texts' | 'colors' | 'setIsManifestoOpen'>> = ({
-    texts,
-    colors,
-    setIsManifestoOpen
-}) => (
-    <section className="py-24 md:py-40 bg-ng-black relative z-10 border-t border-white/5">
-        <div className="max-w-4xl mx-auto px-6">
-            <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="text-center"
-            >
-                <Quote
-                    className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-8 md:mb-12"
-                    style={{ color: colors.primary, opacity: 0.4 }}
-                />
+export const ManifestoTeaser: React.FC<{
+  texts?: { manifestoTitle: string };
+  colors?: { primary: string };
+  setIsManifestoOpen: (isOpen: boolean) => void;
+}> = ({ texts, colors, setIsManifestoOpen }) => {
+  const { config } = useSiteConfig();
+  const teaserTexts = texts ?? config.texts;
+  const teaserColors = colors ?? config.colors;
 
-                <p className="text-2xl md:text-5xl font-serif text-white leading-tight mb-8 md:mb-12">
-                    "{texts.manifestoTitle}"
-                </p>
+  return (
+    <section className="py-24 md:py-36 bg-[#060709] relative z-10 border-t border-white/[0.08]">
+      <div className="max-w-4xl mx-auto px-6 text-center">
+        <m.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.08] bg-[#0C0E12] mb-8">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: teaserColors.primary || '#E5C579' }} />
+            <span className="text-[11px] font-mono tracking-widest text-zinc-400 uppercase">
+              [ MANIFESTO // DECLARAÇÃO DE PRINCÍPIOS ]
+            </span>
+          </div>
 
-                <div className="grid md:grid-cols-2 gap-8 md:gap-16 text-left font-light text-zinc-400 leading-relaxed text-base md:text-lg mb-12">
-                    <p>
-                        Você vê promessas de facilidade e atalhos mágicos por toda parte. O mercado está cheio de ruído e distrações que te afastam do que realmente importa: a construção sólida.
-                    </p>
-                    <p>
-                        A realidade dos negócios exige foco e técnica. É sobre construir algo que dure, com processos validados e uma visão de longo prazo.
-                    </p>
-                </div>
+          <h2 className="text-2xl md:text-5xl font-serif text-white leading-tight mb-8">
+            "{teaserTexts.manifestoTitle}"
+          </h2>
 
-                <button
-                    onClick={() => setIsManifestoOpen(true)}
-                    className="inline-flex items-center gap-2 border-b border-white/20 pb-1 text-sm uppercase tracking-widest text-white/70 hover:text-white hover:border-white transition-all group cursor-pointer"
-                >
-                    <FileText size={14} /> Ler Manifesto Completo <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-            </motion.div>
-        </div>
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 text-left font-light text-zinc-400 leading-relaxed text-base md:text-lg mb-12">
+            <p>
+              Em um mercado saturado de promessas fáceis e atalhos ilusórios, o verdadeiro poder econômico é construído na disciplina, na solidez contábil e na governança rigorosa.
+            </p>
+            <p>
+              O NGHUB estabelece um padrão intransigente de excelência: reunimos apenas operadores que constroem negócios reais, com margem, ética e visão de longo prazo.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setIsManifestoOpen(true)}
+            className="inline-flex items-center gap-2 border-b border-white/20 pb-1.5 text-xs uppercase tracking-widest text-white/80 hover:text-white hover:border-white transition-all group cursor-pointer font-mono"
+          >
+            <FileText size={14} />
+            <span>Ler Declaração de Princípios & Critérios de Seleção</span>
+            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+        </m.div>
+      </div>
     </section>
-);
+  );
+};
 
 export const ManifestoModal: React.FC<ManifestoProps> = ({
-    texts,
-    colors,
-    isManifestoOpen,
-    setIsManifestoOpen,
-    manifestoImage
-}) => (
+  texts,
+  colors,
+  isManifestoOpen,
+  setIsManifestoOpen,
+  manifestoImage,
+  brandMark = 'NG',
+  quote = 'Resultados em silêncio.'
+}) => {
+  const { config } = useSiteConfig();
+  const modalTexts = texts ?? config.texts;
+  const modalColors = colors ?? config.colors;
+  const modalImage = manifestoImage ?? (config.images.gallery.length > 1 ? config.images.gallery[1] : config.images.hero);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsManifestoOpen(false);
+    }
+  }, [setIsManifestoOpen]);
+
+  useEffect(() => {
+    if (isManifestoOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [isManifestoOpen, handleKeyDown]);
+
+  const handleApplyClick = () => {
+    setIsManifestoOpen(false);
+    document.getElementById('apply')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleBackdropTouch = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setIsManifestoOpen(false);
+    }
+  };
+
+  const admissionCriteria = [
+    {
+      title: 'Tração comprovada e faturamento superior ao patamar de entrada',
+      desc: 'Avaliação rigorosa de fluxo de caixa operacional, métricas de retenção e viabilidade de crescimento sustentável sem dependência de capital externo inflado.'
+    },
+    {
+      title: 'Alinhamento ético e postura de longo prazo',
+      desc: 'Idoneidade inegociável, histórico comprovado de cumprimento de acordos e compromisso com práticas transparentes de governança e mercado.'
+    },
+    {
+      title: 'Disposição para contribuir ativamente com o ecossistema',
+      desc: 'Participação presente em conselhos bilaterais, compartilhamento de aprendizados reais de campo e reciprocidade de rede com outros membros.'
+    }
+  ];
+
+  return (
     <AnimatePresence>
-        {isManifestoOpen && (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[9999] flex bg-[#030303] overflow-hidden"
+      {isManifestoOpen && (
+        <m.div
+          id="modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={handleBackdropTouch}
+          className="fixed inset-0 z-[9999] flex bg-[#060709] overflow-hidden"
+        >
+          {/* Left Column: Atmospheric Brand Visual (Desktop Only) */}
+          <m.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="hidden md:block w-5/12 h-full relative overflow-hidden border-r border-white/[0.08]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+            <picture className="w-full h-full">
+              <source srcSet={modalImage.replace(/\.jpg$/, '.avif')} type="image/avif" />
+              <img
+                src={modalImage}
+                alt="NG Atmosphere"
+                decoding="async"
+                className="w-full h-full object-cover grayscale opacity-60 hover:scale-105 transition-transform duration-[3s] ease-out"
+              />
+            </picture>
+
+            {/* Brand Mark Watermark */}
+            <div className="absolute top-12 left-12 z-20">
+              <span className="font-serif font-bold text-4xl text-white tracking-tighter">
+                {brandMark}
+              </span>
+              <span className="block text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">
+                [ PROTOCOL // ADMISSIONS 2026 ]
+              </span>
+            </div>
+
+            {/* Aphorism */}
+            <div className="absolute bottom-12 left-12 z-20 max-w-sm">
+              <p className="font-serif italic text-2xl text-white mb-3">
+                "{quote}"
+              </p>
+              <div className="h-[1px] w-12" style={{ backgroundColor: modalColors.primary || '#E5C579' }} />
+            </div>
+          </m.div>
+
+          {/* Right Column: Scrollable Executive Content */}
+          <m.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ delay: 0.1, duration: 0.7 }}
+            className="w-full md:w-7/12 h-full relative overflow-y-auto custom-scrollbar"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setIsManifestoOpen(false)}
+              aria-label="Fechar manifesto"
+              className="fixed md:absolute top-6 right-6 z-50 text-zinc-400 hover:text-white bg-[#0C0E12]/80 backdrop-blur-md p-3 rounded-full border border-white/[0.08] hover:border-white/20 transition-all cursor-pointer group"
             >
-                {/* Left Column: Visual Atmosphere (Hidden on mobile) */}
-                <motion.div
-                    initial={{ x: '-100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '-100%' }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="hidden md:block w-5/12 h-full relative overflow-hidden border-r border-white/5"
-                >
-                    <div className="absolute inset-0 bg-black/20 z-10" />
-                    <div className="absolute inset-0 bg-noise opacity-30 z-20 mix-blend-overlay" />
-                    <img
-                        src={manifestoImage}
-                        className="w-full h-full object-cover grayscale opacity-60 hover:opacity-80 hover:scale-105 transition-all duration-[2s] ease-in-out"
-                        alt="Atmosphere"
-                    />
+              <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+            </button>
 
-                    {/* Brand Mark */}
-                    <div className="absolute top-10 left-10 z-30">
-                        <h2 className="font-serif font-bold text-4xl text-white tracking-tighter">NG</h2>
-                    </div>
+            <div className="max-w-2xl mx-auto px-8 py-20 md:py-28">
+              {/* SECTION 1: WHO WE ARE / A ORDEM */}
+              <div className="mb-20 relative">
+                <div className="text-[80px] font-serif text-white/[0.03] pointer-events-none select-none -mb-10">
+                  01
+                </div>
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: modalColors.primary || '#E5C579' }} />
+                  <span className="text-xs uppercase font-mono tracking-widest text-zinc-500">A Arquitetura Institucional</span>
+                </div>
 
-                    <div className="absolute bottom-10 left-10 z-30 max-w-sm">
-                        <p className="font-serif italic text-2xl text-white mb-2">"Resultados em silêncio."</p>
-                        <div className="h-[1px] w-12 bg-white/50" />
-                    </div>
-                </motion.div>
+                <h3 className="text-3xl md:text-4xl font-serif text-white mb-6">
+                  Quem Somos.
+                </h3>
+                <div className="space-y-5 text-zinc-300 font-light leading-relaxed text-base md:text-lg">
+                  <p>
+                    Não somos um curso, nem uma confraria informal de fim de semana.
+                  </p>
+                  <p className="text-white font-medium">
+                    Somos o bastidor estratégico do PIB em ascensão.
+                  </p>
+                  <p>
+                    O NGHUB reúne uma aliança reservada de fundadores, executivos e operadores de alta tração que escolheram a construção patrimonial sólida sobre o ruído das redes sociais.
+                  </p>
+                </div>
+              </div>
 
-                {/* Right Column: Content Scroll */}
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 50 }}
-                    transition={{ delay: 0.1, duration: 0.8 }}
-                    className="w-full md:w-7/12 h-full relative overflow-y-auto custom-scrollbar"
-                >
-                    {/* Close Button */}
-                    <button
-                        onClick={() => setIsManifestoOpen(false)}
-                        className="fixed md:absolute top-6 right-6 z-50 text-zinc-500 hover:text-white bg-black/50 backdrop-blur-md p-2 rounded-full border border-white/10 hover:border-white/30 transition-all group"
+              <div className="w-full h-[1px] bg-white/[0.08] mb-20" />
+
+              {/* SECTION 2: DECLARAÇÃO DE PRINCÍPIOS */}
+              <div className="mb-20 relative">
+                <div className="text-[80px] font-serif text-white/[0.03] pointer-events-none select-none -mb-10">
+                  02
+                </div>
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: modalColors.primary || '#E5C579' }} />
+                  <span className="text-xs uppercase font-mono tracking-widest text-zinc-500">Declaração de Princípios</span>
+                </div>
+
+                <h3 className="text-3xl md:text-4xl font-serif text-white mb-6">
+                  {modalTexts.manifestoTitle}
+                </h3>
+
+                <div className="space-y-6 text-zinc-300 font-light leading-relaxed text-base md:text-lg">
+                  <p>
+                    Disseram que o empreendedorismo moderno era sobre fórmulas prontas, atalhos milagrosos e vaidade digital. Rejeitamos integralmente essa premissa.
+                  </p>
+                  <p className="text-white font-serif text-xl italic pl-6 border-l-2 my-6" style={{ borderColor: modalColors.primary || '#E5C579' }}>
+                    O valor econômico perene é forjado na precisão técnica, no domínio de margem e na governança austera.
+                  </p>
+                  <p>
+                    Negócios que transcendem ciclos econômicos não dependem de euforia de mercado. Dependem de fundações sólidas, alocação disciplinada de capital e líderes com régua de exigência inabalável.
+                  </p>
+
+                  <div className="bg-[#0C0E12] p-8 rounded-xl border border-white/[0.08] my-8 space-y-6">
+                    <p className="text-white uppercase font-mono text-xs tracking-widest opacity-80">Nossa Doutrina Operacional:</p>
+                    <ul className="space-y-5">
+                      <li className="flex gap-4 items-baseline">
+                        <span className="font-serif italic font-bold text-lg" style={{ color: modalColors.primary || '#E5C579' }}>I.</span>
+                        <span><strong className="text-white font-medium">Veritas & Fundação:</strong> Toda expansão exige alicerce. Margem líquida, fluxo de caixa e clareza contábil precedem escala.</span>
+                      </li>
+                      <li className="flex gap-4 items-baseline">
+                        <span className="font-serif italic font-bold text-lg" style={{ color: modalColors.primary || '#E5C579' }}>II.</span>
+                        <span><strong className="text-white font-medium">Velocidade com Rigor:</strong> A velocidade de execução só é virtuosa quando acompanhada de método e gestão cirúrgica de risco.</span>
+                      </li>
+                      <li className="flex gap-4 items-baseline">
+                        <span className="font-serif italic font-bold text-lg" style={{ color: modalColors.primary || '#E5C579' }}>III.</span>
+                        <span><strong className="text-white font-medium">Legado & Perpetuidade:</strong> Construímos ativos de valor secular. Dinheiro é consequência matemática da excelência operacional.</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-full h-[1px] bg-white/[0.08] mb-20" />
+
+              {/* SECTION 3: CRITÉRIOS DE SELEÇÃO (ADMISSIONS STANDARD - F11.4) */}
+              <div className="mb-16 relative">
+                <div className="text-[80px] font-serif text-white/[0.03] pointer-events-none select-none -mb-10">
+                  03
+                </div>
+                <div className="flex items-center gap-2 mb-6">
+                  <ShieldCheck size={16} style={{ color: modalColors.primary || '#E5C579' }} />
+                  <span className="text-xs uppercase font-mono tracking-widest text-zinc-500">Critérios de Seleção</span>
+                </div>
+
+                <h3 className="text-3xl md:text-4xl font-serif text-white mb-6">
+                  O Padrão de Admissão.
+                </h3>
+                <p className="text-zinc-400 font-light text-base mb-8">
+                  Para preservar a integridade da mesa e a densidade das discussões bilaterais, todo membro deve atender aos três pilares inegociáveis:
+                </p>
+
+                <div className="space-y-4">
+                  {admissionCriteria.map((criterion, index) => (
+                    <div
+                      key={index}
+                      className="p-6 rounded-xl bg-[#0C0E12] border border-white/[0.08] hover:border-white/20 transition-all"
                     >
-                        <X size={24} className="group-hover:rotate-90 transition-transform duration-500" />
-                    </button>
-
-                    <div className="max-w-2xl mx-auto px-6 py-20 md:py-32">
-
-                        {/* SECTION 1: WHO WE ARE */}
-                        <div className="mb-24 relative">
-                            <div className="absolute -left-12 top-2 text-[100px] font-serif text-white/[0.03] pointer-events-none select-none -z-10">
-                                01
-                            </div>
-                            <div className="flex items-center gap-3 mb-8">
-                                <Users size={16} style={{ color: colors.primary }} />
-                                <span className="text-xs uppercase tracking-[0.3em] text-zinc-500">A Ordem</span>
-                            </div>
-
-                            <h2 className="text-3xl md:text-5xl font-serif text-white mb-8">Quem Somos.</h2>
-                            <div className="space-y-6 text-zinc-400 font-light leading-relaxed text-lg">
-                                <p>
-                                    Não somos um curso. Não somos uma fraternidade de fim de semana.
-                                </p>
-                                <p className="text-white">
-                                    Somos o bastidor do PIB.
-                                </p>
-                                <p>
-                                    O NGHUB é uma ordem silenciosa de jovens empreendedores que escolheram a construção real. Somos os que acordam para construir impérios enquanto o mercado busca atalhos.
-                                </p>
-                                <p>
-                                    Acreditamos que o sucesso deve ser construído tijolo por tijolo, com técnica, honra e resultados concretos.
-                                </p>
-                            </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 size={18} className="mt-1 flex-shrink-0" style={{ color: modalColors.primary || '#E5C579' }} />
+                        <div>
+                          <h4 className="text-white font-serif text-lg mb-2">
+                            {criterion.title}
+                          </h4>
+                          <p className="text-zinc-400 text-sm font-light leading-relaxed">
+                            {criterion.desc}
+                          </p>
                         </div>
-
-                        <div className="w-full h-[1px] bg-white/10 mb-24" />
-
-                        {/* SECTION 2: MANIFESTO */}
-                        <div className="mb-20 relative">
-                            <div className="absolute -left-12 top-2 text-[100px] font-serif text-white/[0.03] pointer-events-none select-none -z-10">
-                                02
-                            </div>
-                            <div className="flex items-center gap-3 mb-8">
-                                <FileText size={16} style={{ color: colors.primary }} />
-                                <span className="text-xs uppercase tracking-[0.3em] text-zinc-500">Manifesto</span>
-                            </div>
-
-                            <h2 className="text-3xl md:text-5xl font-serif text-white mb-8">{texts.manifestoTitle}</h2>
-
-                            <div className="space-y-6 text-zinc-300 font-light leading-relaxed text-lg">
-                                <p>
-                                    Disseram que empreender era sobre "liberdade geográfica". Disseram que era sobre trabalhar na praia com um notebook. Disseram que o caminho era fácil, rápido e indolor.
-                                </p>
-                                <p className="text-white font-serif text-xl italic pl-6 border-l-2" style={{ borderColor: colors.primary }}>
-                                    Esqueça. Tudo isso é ruído.
-                                </p>
-                                <p>
-                                    A vida real não tem filtro de Instagram. A vida real tem cheiro de café frio às 23h da noite. A vida real é ter que demitir um pai de família olhando no olho dele, segurar o choro, e voltar para a sala de reunião para bater a meta porque a sua empresa depende disso.
-                                </p>
-                                <p>
-                                    O empreendedorismo não é um parque de diversões para adultos infantilizados. <strong className="text-white">É uma guerra.</strong> E na guerra, quem não tem técnica, morre.
-                                </p>
-                                <p>
-                                    A NG.Hub nasceu porque cansamos de ver gente boa, gente com potencial, com garra, sendo seduzida pelo canto da sereia da mediocridade. Cansamos de ver "gurus" que nunca emitiram uma Nota Fiscal ensinando sobre gestão.
-                                </p>
-
-                                <div className="bg-white/5 p-8 rounded-sm border border-white/5 my-8">
-                                    <p className="text-white uppercase tracking-widest text-xs mb-6 opacity-70">Nossa Filosofia:</p>
-                                    <ul className="space-y-4">
-                                        <li className="flex gap-4 items-baseline">
-                                            <span className="font-serif italic text-white" style={{ color: colors.primary }}>I.</span>
-                                            <span>Você cria uma <strong className="text-white">BASE</strong> sólida. Sem fundação, nada para em pé.</span>
-                                        </li>
-                                        <li className="flex gap-4 items-baseline">
-                                            <span className="font-serif italic text-white" style={{ color: colors.primary }}>III.</span>
-                                            <span>Você impõe um <strong className="text-white">RITMO</strong> alucinante. O mercado não tem pena de quem é lento.</span>
-                                        </li>
-                                        <li className="flex gap-4 items-baseline">
-                                            <span className="font-serif italic text-white" style={{ color: colors.primary }}>III.</span>
-                                            <span>Você constrói um <strong className="text-white">LEGADO</strong>. Dinheiro é consequência, não propósito.</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <p>
-                                    Nós somos a trincheira. Somos o lugar onde você pode abrir seus números vermelhos sem ser julgado, mas sabendo que será cobrado para deixá-los azuis.
-                                </p>
-                                <p>
-                                    Se você está procurando um atalho, saia agora. Mas se você entendeu que a única saída é através do trabalho duro...
-                                </p>
-                                <p className="text-2xl font-serif text-white pt-6">
-                                    Bem-vindo à vida real. <br />
-                                    <span style={{ color: colors.primary }}>Bem-vindo à NG.Hub.</span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-center pt-10">
-                            <button
-                                onClick={() => { setIsManifestoOpen(false); document.getElementById('apply')?.scrollIntoView({ behavior: 'smooth' }) }}
-                                className="px-10 py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.2em] hover:bg-zinc-200 transition-colors rounded-sm shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                            >
-                                Solicitar Acesso
-                            </button>
-                        </div>
-
+                      </div>
                     </div>
-                </motion.div>
-            </motion.div>
-        )}
+                  ))}
+                </div>
+
+                <p className="text-xs text-zinc-500 font-mono tracking-wider mt-6 text-center">
+                  TAXA HISTÓRICA DE APROVAÇÃO DE CANDIDATURAS: &lt; 6.2%
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <div className="flex justify-center pt-8">
+                <button
+                  onClick={handleApplyClick}
+                  className="px-10 py-4 bg-white text-black font-semibold uppercase text-xs font-mono tracking-[0.2em] hover:bg-zinc-200 transition-colors rounded-lg shadow-[0_0_30px_rgba(255,255,255,0.15)] cursor-pointer"
+                >
+                  Candidatar-me
+                </button>
+              </div>
+            </div>
+          </m.div>
+        </m.div>
+      )}
     </AnimatePresence>
-);
+  );
+};
+
+export default ManifestoModal;

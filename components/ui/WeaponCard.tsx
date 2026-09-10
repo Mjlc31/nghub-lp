@@ -1,14 +1,23 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { PillarProps } from '../../types';
 
-export const WeaponCard: React.FC<PillarProps & { primaryColor: string }> = ({ icon, title, description, primaryColor }) => (
-    <motion.div
+export interface WeaponCardProps extends PillarProps {
+    primaryColor: string;
+}
+
+export const WeaponCard = ({
+    icon,
+    title,
+    description,
+    primaryColor
+}: WeaponCardProps): React.JSX.Element => (
+    <m.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         className="group relative p-8 md:p-10 h-full border border-white/5 hover:border-white/10 transition-all duration-700 bg-white/[0.01] hover:bg-white/[0.03] backdrop-blur-sm overflow-hidden"
-        style={{ borderColor: `rgba(255,255,255,0.05)` }} // Initial border
+        style={{ borderColor: `rgba(255,255,255,0.05)` }}
     >
         {/* Dynamic border color on hover */}
         <div
@@ -26,5 +35,5 @@ export const WeaponCard: React.FC<PillarProps & { primaryColor: string }> = ({ i
         <p className="text-zinc-500 font-sans text-sm leading-relaxed font-light group-hover:text-zinc-300 transition-colors duration-500">
             {description}
         </p>
-    </motion.div>
+    </m.div>
 );

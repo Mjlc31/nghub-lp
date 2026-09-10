@@ -2,20 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Utilities that might not be in Tailwind Config yet or need specific cascading */
+/* CSS Variables for Dynamic Color & Typography Triad Tokens */
+:root {
+  --bg-canvas: #060709;
+  --bg-surface: #0C0E12;
+  --bg-surface-elevated: #14171F;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-faint: rgba(255, 255, 255, 0.05);
+  --accent-champagne: #E5C579;
+  --accent-gold-muted: #C5A059;
+}
+
+/* Custom Utilities for Glassmorphism, Spotlight & Precision Hairlines */
 @layer utilities {
+  /* Precision Obsidian Glass Cards */
   .glass-card {
-    @apply bg-white/[0.02] backdrop-blur-[20px] border border-white/[0.03] shadow-2xl;
+    @apply bg-[#0C0E12]/80 backdrop-blur-xl border border-white/[0.08] shadow-2xl;
+  }
+
+  .glass-card-hover {
+    @apply hover:border-white/[0.16] hover:bg-[#14171F]/90 transition-all duration-300;
+  }
+
+  .glass-panel {
+    @apply bg-[#060709]/70 backdrop-blur-2xl border border-white/[0.08];
+  }
+
+  /* Interactive Cursor Spotlight Container */
+  .spotlight-card {
+    position: relative;
+    background-color: #0C0E12;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+
+  .spotlight-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.06),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  .spotlight-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Pale Champagne Glow Utilities */
+  .glow-champagne {
+    box-shadow: 0 0 35px -5px rgba(229, 197, 121, 0.18);
+  }
+
+  .glow-champagne-sm {
+    box-shadow: 0 0 20px -3px rgba(229, 197, 121, 0.12);
+  }
+
+  /* Telemetry Chip & Monospace Badge */
+  .telemetry-chip {
+    @apply font-mono text-[11px] tracking-[0.18em] uppercase px-3 py-1 rounded-full border border-white/[0.08] bg-white/[0.03] text-neutral-400 inline-flex items-center gap-2;
+  }
+
+  /* Gradient Hairline Dividers */
+  .hairline-divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+  }
+
+  .hairline-divider-champagne {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(229, 197, 121, 0.25) 50%, transparent 100%);
   }
 }
 
 /* Base Styles */
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
-  background-color: #030303;
+  background-color: #060709;
+  color: #F5F5F5;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom Scrollbar */
@@ -24,19 +103,19 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: #060709;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #14171F;
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #C5A059;
+  background: #E5C579;
 }
 
-/* Noise Overlay */
+/* Technical Micro-Noise Overlay */
 .bg-noise {
   position: fixed;
   top: 0;
@@ -45,11 +124,11 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 50;
-  opacity: 0.04;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
 }
 
-/* Vignette */
+/* Vignette (Tuned to Obsidian #060709) */
 .vignette-overlay {
   position: fixed;
   top: 0;
@@ -58,5 +137,19 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 40;
-  background: radial-gradient(circle at center, transparent 40%, #030303 120%);
+  background: radial-gradient(circle at center, transparent 40%, #060709 120%);
+}
+
+/* Infinite Marquee */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }

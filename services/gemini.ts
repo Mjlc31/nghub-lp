@@ -1,18 +1,14 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
 let genAI: GoogleGenerativeAI | null = null;
 
-if (API_KEY) {
-    genAI = new GoogleGenerativeAI(API_KEY);
-} else {
-    console.warn("Missing Gemini API Key");
-}
-
 export const getGeminiModel = (modelName: string = "gemini-pro") => {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY);
+    if (!apiKey) {
+        throw new Error("Gemini API not configured. Please define VITE_GEMINI_API_KEY in your .env file.");
+    }
     if (!genAI) {
-        throw new Error("Gemini API not initialized");
+        genAI = new GoogleGenerativeAI(apiKey);
     }
     return genAI.getGenerativeModel({ model: modelName });
 };

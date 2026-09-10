@@ -1,6 +1,10 @@
 import React from 'react';
 
-export const GlobalEffects = () => (
+export interface AmbientLightProps {
+    primaryColor: string;
+}
+
+export const GlobalEffects = (): React.JSX.Element => (
     <>
         {/* CSS Noise Overlay defined in index.html */}
         <div className="bg-noise" />
@@ -9,7 +13,7 @@ export const GlobalEffects = () => (
     </>
 );
 
-export const AmbientLight = ({ primaryColor }: { primaryColor: string }) => (
+export const AmbientLight = ({ primaryColor }: AmbientLightProps): React.JSX.Element => (
     <div className="absolute top-0 left-0 right-0 h-[100vh] overflow-hidden pointer-events-none z-0">
         <div
             className="absolute top-[-20%] left-[20%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] rounded-full blur-[100px] md:blur-[150px]"

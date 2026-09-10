@@ -1,24 +1,24 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
-interface MarqueeColumnProps {
+export interface MarqueeColumnProps {
     images: string[];
     direction?: 'up' | 'down';
     speed?: number;
     primaryColor: string;
 }
 
-export const MarqueeColumn: React.FC<MarqueeColumnProps> = ({
+export const MarqueeColumn = ({
     images,
     direction = 'up',
     speed = 20,
     primaryColor
-}) => {
+}: MarqueeColumnProps): React.JSX.Element => {
     const displayImages = [...images, ...images, ...images];
 
     return (
         <div className="flex-1 relative h-[100vh] overflow-hidden">
-            <motion.div
+            <m.div
                 animate={{
                     y: direction === 'up' ? ["0%", "-33.33%"] : ["-33.33%", "0%"]
                 }}
@@ -44,7 +44,7 @@ export const MarqueeColumn: React.FC<MarqueeColumnProps> = ({
                         />
                     </div>
                 ))}
-            </motion.div>
+            </m.div>
         </div>
     );
 };

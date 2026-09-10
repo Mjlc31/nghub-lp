@@ -1,39 +1,39 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Settings, X, Trash2, Plus, RotateCcw, Check, Copy, AlertTriangle, Loader2, Database, Image as ImageIcon, Type, Palette, Link as LinkIcon, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useMemo } from 'react';
+import { Settings, X, Trash2, Plus, RotateCcw, Check, Copy, AlertTriangle, Loader2, Database, Image as ImageIcon, Type, Palette, Link as LinkIcon, Sparkles, Users } from 'lucide-react';
+import { m, AnimatePresence } from 'framer-motion';
 import { ImageControl, InputGroup, SectionTitle } from './admin/ImageControl';
+import { LeadsTable } from './admin/LeadsTable';
 import { compressImage } from '../utils/imageUtils';
 import { generateContent } from '../services/gemini';
+import { SiteConfig } from '../types';
 
-// --- TYPES ---
-interface SiteConfig {
-  images: {
-    hero: string;
-    quoteParallax: string;
-    gallery: string[];
-  };
-  texts: {
-    heroTitle: string;
-    heroSubtitle: string;
-    ctaButton: string;
-    manifestoTitle: string;
-  };
-  colors: {
-    primary: string;
-  };
-  integration: {
-    formEndpoint: string;
-  };
-}
-
-interface AdminPanelProps {
+export interface AdminPanelProps {
   config: SiteConfig;
-  onUpdate: (newConfig: SiteConfig) => void;
-  onReset?: () => void;
+  onUpdate: (newConfig: SiteConfig) => void | Promise<void>;
+  onReset?: () => void | Promise<void>;
   hasSaveError?: boolean;
+  onLogout?: () => void | Promise<void>;
 }
 
-type Tab = 'images' | 'texts' | 'colors' | 'settings';
+export interface AIButtonProps {
+  field: keyof SiteConfig['texts'];
+  context: string;
+  isGeneratingAI: string | null;
+  onGenerate: (field: keyof SiteConfig['texts'], context: string) => void;
+}
+
+const AIButton: React.FC<AIButtonProps> = ({ field, context, isGeneratingAI, onGenerate }) => (
+  <button
+    onClick={() => onGenerate(field, context)}
+    disabled={!!isGeneratingAI}
+    className="absolute top-0 right-0 p-2 text-ng-gold/70 hover:text-ng-gold transition-colors disabled:opacity-50"
+    title="Gerar com IA"
+  >
+    {isGeneratingAI === field ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+  </button>
+);
+
+export type Tab = 'images' | 'texts' | 'colors' | 'settings' | 'leads';
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onReset, hasSaveError }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,22 +41,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
   const [copied, setCopied] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState<string | null>(null);
-  const [storageUsage, setStorageUsage] = useState(0);
+
+  // Monitor storage usage
+  const storageUsage = useMemo(() => {
+    if (typeof window === 'undefined') return 0;
+    const totalString = JSON.stringify(config);
+    const size = new Blob([totalString]).size;
+    const LIMIT = 4800000;
+    return Math.min(100, Math.round((size / LIMIT) * 100));
+  }, [config]);
 
   const singleFileRef = useRef<HTMLInputElement>(null);
   const galleryFileRef = useRef<HTMLInputElement>(null);
   const [activeImageKey, setActiveImageKey] = useState<string | null>(null);
-
-  // Monitor storage usage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const totalString = JSON.stringify(config);
-      const size = new Blob([totalString]).size;
-      const LIMIT = 4800000;
-      const percentage = Math.min(100, Math.round((size / LIMIT) * 100));
-      setStorageUsage(percentage);
-    }
-  }, [config, isOpen]);
 
   // --- HANDLERS ---
 
@@ -179,24 +176,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
     return 'bg-green-500';
   };
 
-  const AIButton = ({ field, context }: { field: keyof typeof config.texts, context: string }) => (
-    <button
-      onClick={() => generateTextWithAI(field, context)}
-      disabled={!!isGeneratingAI}
-      className="absolute top-0 right-0 p-2 text-ng-gold/70 hover:text-ng-gold transition-colors disabled:opacity-50"
-      title="Gerar com IA"
-    >
-      {isGeneratingAI === field ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-    </button>
-  );
-
   return (
     <>
       <input type="file" ref={singleFileRef} className="hidden" accept="image/*" onChange={(e) => activeImageKey && handleSingleImageUpload(e, activeImageKey)} />
       <input type="file" ref={galleryFileRef} className="hidden" accept="image/*" onChange={handleGalleryUpload} />
 
       {/* Trigger Button - High Z-Index */}
-      <motion.button
+      <m.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="fixed bottom-6 right-6 z-[9999] bg-zinc-900 text-white p-3.5 rounded-full border border-white/20 hover:border-ng-gold hover:text-ng-gold transition-all shadow-[0_10px_30px_rgba(0,0,0,0.5)] group"
@@ -207,14 +193,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
         {storageUsage > 90 && (
           <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full animate-pulse border-2 border-black" />
         )}
-      </motion.button>
+      </m.button>
 
       {/* Panel Overlay */}
       <AnimatePresence>
         {isOpen && (
           <>
             {/* Backdrop */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -223,7 +209,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
             />
 
             {/* Sidebar */}
-            <motion.div
+            <m.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -248,6 +234,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
               {/* Tabs */}
               <div className="flex border-b border-white/10 bg-black/20">
                 {[
+                  { id: 'leads', label: 'Candidaturas', icon: Users },
                   { id: 'images', label: 'Mídia', icon: ImageIcon },
                   { id: 'texts', label: 'Texto', icon: Type },
                   { id: 'colors', label: 'Estilo', icon: Palette },
@@ -278,6 +265,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
                         O navegador está cheio. Remova fotos da galeria para conseguir salvar novas alterações.
                       </p>
                     </div>
+                  </div>
+                )}
+
+                {/* LEADS TAB */}
+                {activeTab === 'leads' && (
+                  <div className="space-y-6">
+                    <SectionTitle>Gestão de Candidaturas</SectionTitle>
+                    <LeadsTable />
                   </div>
                 )}
 
@@ -353,7 +348,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
                           rows={4}
                           className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 focus:bg-black/60 outline-none transition-all resize-none font-light leading-relaxed pr-8"
                         />
-                        <AIButton field="heroTitle" context="Título Principal da Landing Page, algo provocativo sobre sucesso e ambiente" />
+                        <AIButton field="heroTitle" context="Título Principal da Landing Page, algo provocativo sobre sucesso e ambiente" isGeneratingAI={isGeneratingAI} onGenerate={generateTextWithAI} />
                       </div>
                     </InputGroup>
                     <InputGroup label="Subtítulo">
@@ -364,7 +359,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
                           rows={3}
                           className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 focus:bg-black/60 outline-none transition-all resize-none font-light pr-8"
                         />
-                        <AIButton field="heroSubtitle" context="Subtítulo explicando que NGHUB é um ecossistema, não um curso" />
+                        <AIButton field="heroSubtitle" context="Subtítulo explicando que NGHUB é um ecossistema, não um curso" isGeneratingAI={isGeneratingAI} onGenerate={generateTextWithAI} />
                       </div>
                     </InputGroup>
                     <InputGroup label="Botão Principal">
@@ -375,7 +370,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
                           onChange={(e) => updateText('ctaButton', e.target.value)}
                           className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 outline-none transition-all pr-8"
                         />
-                        <AIButton field="ctaButton" context="Chamada para ação curta e forte" />
+                        <AIButton field="ctaButton" context="Chamada para ação curta e forte" isGeneratingAI={isGeneratingAI} onGenerate={generateTextWithAI} />
                       </div>
                     </InputGroup>
 
@@ -388,7 +383,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
                           onChange={(e) => updateText('manifestoTitle', e.target.value)}
                           className="w-full bg-black/40 border border-zinc-800 text-zinc-200 p-3 rounded text-sm focus:border-white/50 outline-none transition-all pr-8"
                         />
-                        <AIButton field="manifestoTitle" context="Título polêmico para um manifesto de vendas" />
+                        <AIButton field="manifestoTitle" context="Título polêmico para um manifesto de vendas" isGeneratingAI={isGeneratingAI} onGenerate={generateTextWithAI} />
                       </div>
                     </InputGroup>
                   </div>
@@ -479,7 +474,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ config, onUpdate, onRese
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>
