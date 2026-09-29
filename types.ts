@@ -6,8 +6,11 @@ export interface LeadFormData {
   full_name: string;
   whatsapp: string;
   instagram: string;
+  company: string;
   niche: string;
   revenue_range: string;
+  headcount: string;
+  primary_goal: string;
   biggest_challenge: string;
 }
 
@@ -76,6 +79,13 @@ export interface SiteConfig {
     quoteParallax: string;
     gallery: string[];
   };
+  event?: {
+    date: string;
+    location: string;
+    venue: string;
+    seats: number;
+    isoDate: string;
+  };
   texts: {
     heroTitle: string;
     heroSubtitle: string;
@@ -85,6 +95,16 @@ export interface SiteConfig {
     pillars?: Array<{
       title: string;
       description: string;
+    }>;
+    testimonials?: Array<{
+      quote: string;
+      name: string;
+      role: string;
+      metric: string;
+    }>;
+    faq?: Array<{
+      q: string;
+      a: string;
     }>;
   };
   colors: {

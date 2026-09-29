@@ -41,9 +41,12 @@ export const submitLead = async (
   const crmPayload = {
     name: leadData.full_name,
     phone: leadData.whatsapp,
-    instagram: leadData.instagram,
+    instagram: leadData.instagram || '',
+    company: leadData.company,
+    headcount: leadData.headcount,
     sector: leadData.niche,
     revenue_text: leadData.revenue_range,
+    primary_goal: leadData.primary_goal,
     pain_point: leadData.biggest_challenge,
     stage: 'Novo Lead',
     origin: 'Landing Page NGHUB',
@@ -54,8 +57,6 @@ export const submitLead = async (
     .from('leads')
     .insert([crmPayload]);
 
-  const data = null;
-
   if (error) {
     console.error('Supabase DB Insert Error:', error.message);
     return { success: false, data: null, error: error.message };
@@ -65,14 +66,12 @@ export const submitLead = async (
   const targetWebhook = webhookEndpoint || (import.meta.env.VITE_LEADS_WEBHOOK_URL as string | undefined);
   if (targetWebhook && targetWebhook.trim().length > 0) {
     try {
-      const inserted = data as { id?: string; created_at?: string } | null;
       fetch(targetWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           ...crmPayload,
-          id: inserted?.id,
-          created_at: inserted?.created_at || new Date().toISOString()
+          created_at: new Date().toISOString()
         })
       }).catch((err) => {
         console.warn('Webhook notification failed (non-blocking):', err);
@@ -82,7 +81,7 @@ export const submitLead = async (
     }
   }
 
-  return { success: true, data, error: null };
+  return { success: true, data: null, error: null };
 };
 
 // --- LEADS ADMIN (CRM) ---

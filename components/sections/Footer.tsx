@@ -100,10 +100,10 @@ export const Footer: React.FC = () => {
         {/* Official Communication Channels */}
         <div className="flex justify-center gap-6 mb-12">
           <a
-            href="https://instagram.com"
+            href="https://instagram.com/nghub.oficial"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Instagram"
+            aria-label="Instagram NGHUB"
             className="w-10 h-10 rounded-full border border-white/[0.08] bg-white/[0.02] flex items-center justify-center text-zinc-400 hover:text-white hover:border-white/20 transition-all hover:scale-105"
           >
             <Instagram className="w-4 h-4" strokeWidth={1.5} />

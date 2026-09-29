@@ -15,6 +15,9 @@ const Gallery = React.lazy(() => import('./components/sections/Gallery').then(m 
 const Footer = React.lazy(() => import('./components/sections/Footer').then(m => ({ default: m.Footer })));
 const ParallaxQuote = React.lazy(() => import('./components/sections/Footer').then(m => ({ default: m.ParallaxQuote })));
 const Arsenal = React.lazy(() => import('./components/sections/Arsenal').then(m => ({ default: m.Arsenal })));
+const Testimonials = React.lazy(() => import('./components/sections/Testimonials').then(m => ({ default: m.Testimonials })));
+const FAQ = React.lazy(() => import('./components/sections/FAQ').then(m => ({ default: m.FAQ })));
+const Countdown = React.lazy(() => import('./components/sections/Countdown').then(m => ({ default: m.Countdown })));
 
 const SectionLoader = () => (
   <div className="w-full h-96 flex items-center justify-center text-ng-gold/30">
@@ -44,7 +47,10 @@ const AppContent: React.FC = () => {
         <ManifestoTeaser setIsManifestoOpen={setIsManifestoOpen} />
         <Suspense fallback={<SectionLoader />}><ParallaxQuote /></Suspense>
         <Suspense fallback={<SectionLoader />}><Gallery scrollToApply={scrollToApply} /></Suspense>
+        <Suspense fallback={<SectionLoader />}><Testimonials /></Suspense>
+        <Suspense fallback={<SectionLoader />}><Countdown /></Suspense>
         <ApplicationSection />
+        <Suspense fallback={<SectionLoader />}><FAQ /></Suspense>
       </main>
 
       <Suspense fallback={null}><Footer /></Suspense>

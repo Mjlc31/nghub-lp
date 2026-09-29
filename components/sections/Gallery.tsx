@@ -19,39 +19,39 @@ interface ShowcaseItem {
 const SHOWCASE_METADATA: ShowcaseItem[] = [
   {
     image: '/NG-355.jpg',
-    badge: '[ DINNER // FARIA LIMA ]',
-    title: 'Closed-Door Executive Dinner',
-    location: 'Faria Lima, São Paulo'
+    badge: '[ DINNER // MACEIÓ ]',
+    title: 'Jantar de Conexões Executivas',
+    location: 'Divina Gula, Maceió'
   },
   {
     image: '/NG-392.jpg',
-    badge: '[ PRIVATE SESSION // JK IGUATEMI ]',
-    title: 'Boardroom Advisory & Governance',
-    location: 'JK Iguatemi, São Paulo'
+    badge: '[ PRIVATE SESSION // MACEIÓ ]',
+    title: 'Boardroom Advisory & Governança',
+    location: 'Maceió, AL'
   },
   {
     image: '/NG-599.jpg',
-    badge: '[ ANNUAL SUMMIT // SÃO PAULO ]',
-    title: 'Annual Assembly of Founders',
-    location: 'Rosewood, São Paulo'
+    badge: '[ SUMMIT // ECOSSISTEMA ]',
+    title: 'Encontro Anual de Fundadores',
+    location: 'Maceió, AL'
   },
   {
     image: '/NG-607.jpg',
-    badge: '[ MASTERMIND // ALPHAVILLE ]',
-    title: 'Strategic Scaling & M&A Retreat',
-    location: 'Alphaville, São Paulo'
+    badge: '[ MASTERMIND // IMERSÃO ]',
+    title: 'Imersão Estratégica & Scaling',
+    location: 'Maceió, AL'
   },
   {
     image: '/NG-863 (1).jpg',
-    badge: '[ DINNER // FARIA LIMA ]',
+    badge: '[ DINNER // CONEXÕES ]',
     title: 'Syndicate & Deal Flow Briefing',
-    location: 'Faria Lima, São Paulo'
+    location: 'Divina Gula, Maceió'
   },
   {
     image: '/NG-873.jpg',
-    badge: '[ PRIVATE SESSION // JK IGUATEMI ]',
+    badge: '[ SESSION // ROUNDTABLE ]',
     title: 'Capital Allocation Roundtable',
-    location: 'JK Iguatemi, São Paulo'
+    location: 'Maceió, AL'
   }
 ];
 

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { formatPhoneNumber } from '../utils/formatUtils';
 import { submitLead } from '../services/supabase';
 
-import { REVENUE_BRACKETS } from '../types/leads';
+import { REVENUE_BRACKETS, HEADCOUNT_BRACKETS, GOAL_BRACKETS } from '../types/leads';
 
 export interface LeadFormProps {
   endpoint?: string;
@@ -13,18 +13,21 @@ export interface LeadFormProps {
 
 const leadSchema = z.object({
   full_name: z.string().trim().min(3, "Nome completo é obrigatório"),
-  whatsapp: z.string().trim().min(14, "WhatsApp inválido. Siga o formato (00) 00000-0000"),
+  whatsapp: z.string().trim().min(14, "WhatsApp inválido"),
   instagram: z.string().trim().min(2, "Instagram é obrigatório"),
+  company: z.string().trim().min(2, "Empresa é obrigatória"),
   niche: z.string().trim().min(2, "Nicho é obrigatório"),
+  headcount: z.enum(HEADCOUNT_BRACKETS, { message: "Selecione o tamanho" }),
   revenue_range: z.enum(REVENUE_BRACKETS, {
     message: "Selecione o faturamento"
   }),
+  primary_goal: z.enum(GOAL_BRACKETS, { message: "Selecione seu objetivo" }),
   biggest_challenge: z.string().trim().min(5, "Descreva seu maior desafio em mais palavras"),
   hp: z.string().optional()
 });
 
-const step1Schema = leadSchema.pick({ full_name: true, whatsapp: true });
-const step2Schema = leadSchema.pick({ instagram: true, niche: true });
+const step1Schema = leadSchema.pick({ full_name: true, whatsapp: true, instagram: true });
+const step2Schema = leadSchema.pick({ company: true, niche: true, headcount: true });
 
 export interface InputFieldProps {
   label: string;
@@ -126,8 +129,11 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
     full_name: '',
     whatsapp: '',
     instagram: '',
+    company: '',
     niche: '',
+    headcount: '',
     revenue_range: '',
+    primary_goal: '',
     biggest_challenge: '',
     hp: ''
   });
@@ -192,8 +198,11 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
           full_name: '',
           whatsapp: '',
           instagram: '',
+          company: '',
           niche: '',
+          headcount: '',
           revenue_range: '',
+          primary_goal: '',
           biggest_challenge: '',
           hp: ''
         });
@@ -216,8 +225,11 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
           full_name: '',
           whatsapp: '',
           instagram: '',
+          company: '',
           niche: '',
+          headcount: '',
           revenue_range: '',
+          primary_goal: '',
           biggest_challenge: '',
           hp: ''
         });
@@ -282,7 +294,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
         <div className="grid grid-cols-3 gap-2 border-b border-white/10 pb-6">
           {[
             { step: 1, title: '01. Identificação' },
-            { step: 2, title: '02. Presença' },
+            { step: 2, title: '02. A Empresa' },
             { step: 3, title: '03. Qualificação' }
           ].map(s => (
             <div
@@ -321,14 +333,25 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
               placeholder="Seu nome oficial"
             />
 
-            <InputField
-              label="WhatsApp"
-              name="whatsapp"
-              value={formData.whatsapp}
-              onChange={handleChange}
-              disabled={isFormLocked}
-              placeholder="(00) 00000-0000"
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <InputField
+                label="WhatsApp"
+                name="whatsapp"
+                value={formData.whatsapp}
+                onChange={handleChange}
+                disabled={isFormLocked}
+                placeholder="(00) 00000-0000"
+              />
+
+              <InputField
+                label="Instagram"
+                name="instagram"
+                value={formData.instagram}
+                onChange={handleChange}
+                disabled={isFormLocked}
+                placeholder="@seu.perfil"
+              />
+            </div>
 
             <div className="pt-4">
               <button
@@ -352,23 +375,32 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
             transition={{ duration: 0.3 }}
             className="space-y-6 md:space-y-8"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <InputField
-                label="Instagram"
-                name="instagram"
-                value={formData.instagram}
-                onChange={handleChange}
-                disabled={isFormLocked}
-                placeholder="@seu.perfil"
-              />
+            <InputField
+              label="Nome da Empresa"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              disabled={isFormLocked}
+              placeholder="Ex: Acme Corp"
+            />
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <InputField
                 label="Nicho de Atuação"
                 name="niche"
                 value={formData.niche}
                 onChange={handleChange}
                 disabled={isFormLocked}
-                placeholder="Ex: SaaS B2B, Finanças, EdTech..."
+                placeholder="Ex: SaaS B2B, Finanças..."
+              />
+
+              <SelectField
+                label="Tamanho da Equipe"
+                name="headcount"
+                value={formData.headcount}
+                onChange={handleChange}
+                disabled={isFormLocked}
+                options={HEADCOUNT_BRACKETS}
               />
             </div>
 
@@ -403,14 +435,25 @@ export const LeadForm: React.FC<LeadFormProps> = ({ endpoint }) => {
             transition={{ duration: 0.3 }}
             className="space-y-6 md:space-y-8"
           >
-            <SelectField
-              label="Faturamento Mensal"
-              name="revenue_range"
-              value={formData.revenue_range}
-              onChange={handleChange}
-              disabled={isFormLocked}
-              options={REVENUE_BRACKETS}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <SelectField
+                label="Faturamento Mensal"
+                name="revenue_range"
+                value={formData.revenue_range}
+                onChange={handleChange}
+                disabled={isFormLocked}
+                options={REVENUE_BRACKETS}
+              />
+
+              <SelectField
+                label="Objetivo Principal"
+                name="primary_goal"
+                value={formData.primary_goal}
+                onChange={handleChange}
+                disabled={isFormLocked}
+                options={GOAL_BRACKETS}
+              />
+            </div>
 
             <div className="flex flex-col space-y-2 md:space-y-3 group">
               <label className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-medium ml-1 transition-colors group-hover:text-ng-gold/70">

@@ -1,8 +1,12 @@
-import React from 'react';
-import { m } from 'framer-motion';
+import React, { useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Users, TrendingUp, Compass, ArrowUpRight, Zap } from 'lucide-react';
 import { SpotlightCard } from '../ui/Spotlight';
 import { useSiteConfig } from '../../context/SiteConfigContext';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export interface BentoCardData {
   id: string;
@@ -69,10 +73,44 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ pillars, colors, id = 'ars
   const displayPillars = pillars ?? config.texts.pillars;
   const displayColors = colors ?? config.colors;
 
-  // Graceful fallback tested in F10.5
+  const sectionRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    // Header reveal
+    gsap.fromTo(headerRef.current,
+      { y: 24, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: headerRef.current,
+          start: 'top 85%',
+        }
+      }
+    );
+
+    // Cards stagger
+    gsap.fromTo('.bento-card',
+      { y: 30, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 75%',
+        }
+      }
+    );
+  }, { scope: sectionRef });
+
   if (!displayPillars || displayPillars.length === 0) return null;
 
-  // Reconcile dynamic config pillars with bento cards
   const cards: BentoCardData[] = DEFAULT_BENTO_CARDS.map((defaultCard, index) => {
     if (displayPillars[index]) {
       return {
@@ -85,14 +123,11 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ pillars, colors, id = 'ars
   });
 
   return (
-    <section id={id} className="py-24 md:py-36 bg-[#060709] relative z-10 border-t border-white/[0.08]">
+    <section id={id} ref={sectionRef} className="py-24 md:py-36 bg-[#060709] relative z-10 border-t border-white/[0.08]">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
-        <m.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+        <div
+          ref={headerRef}
           className="text-center mb-16 md:mb-24"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.08] bg-[#0C0E12] mb-6">
@@ -108,25 +143,28 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ pillars, colors, id = 'ars
           <p className="text-zinc-400 font-light text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
             Substituímos o ruído do mercado por um ambiente fechado de alta densidade. Quatro vetores fundamentais para a perpetuidade do seu negócio.
           </p>
-        </m.div>
+        </div>
 
-        {/* Asymmetrical Bento Grid (8+4, 4+8) */}
-        <div className="grid grid-cols-12 gap-6">
-          {cards.map((card, index) => {
+        {/* Horizontal Scroll Container */}
+        <div className="flex overflow-x-auto gap-6 pb-12 snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {cards.map((card) => {
             const Icon = card.icon;
+            
+            // Map the previous grid spans to horizontal widths
+            const isLarge = card.colSpan.includes('8');
+            const widthClass = isLarge 
+              ? 'w-[85vw] md:w-[600px] lg:w-[700px]' 
+              : 'w-[85vw] md:w-[400px] lg:w-[450px]';
+
             return (
-              <m.div
+              <div
                 key={card.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                className={card.colSpan}
+                className={`bento-card shrink-0 snap-center ${widthClass}`}
               >
                 <SpotlightCard 
                   spotlightColor={displayColors.primary ? `${displayColors.primary}1A` : 'rgba(229, 197, 121, 0.12)'}
                   size={500}
-                  className="p-8 md:p-10 justify-between min-h-[320px] md:min-h-[360px] bg-white/[0.02] backdrop-blur-md hover:-translate-y-1 hover:shadow-2xl transition-all duration-500"
+                  className="p-8 md:p-10 justify-between min-h-[320px] md:min-h-[360px] h-full bg-white/[0.02] backdrop-blur-md hover:-translate-y-1 hover:shadow-2xl transition-all duration-500"
                 >
                   {/* Card Top: Telemetry & Icon */}
                   <div>
@@ -135,7 +173,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ pillars, colors, id = 'ars
                         {card.badge}
                       </span>
                       <div 
-                        className="w-10 h-10 rounded-lg bg-white/[0.03] border border-white/[0.08] group-hover:border-white/20 flex items-center justify-center text-zinc-400 group-hover:text-white transition-all duration-300 group-hover:scale-110"
+                        className="w-10 h-10 shrink-0 rounded-lg bg-white/[0.03] border border-white/[0.08] group-hover:border-white/20 flex items-center justify-center text-zinc-400 group-hover:text-white transition-all duration-300 group-hover:scale-110"
                         style={{ color: displayColors.primary || '#E5C579' }}
                       >
                         <Icon className="w-5 h-5" strokeWidth={1.5} />
@@ -151,7 +189,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ pillars, colors, id = 'ars
                   </div>
 
                   {/* Card Bottom: Telemetry Metrics */}
-                  <div className="pt-6 border-t border-white/[0.06] flex items-center justify-between group-hover:border-white/[0.15] transition-colors">
+                  <div className="pt-6 mt-auto border-t border-white/[0.06] flex items-center justify-between group-hover:border-white/[0.15] transition-colors">
                     <div>
                       <span className="text-xs font-mono font-semibold tracking-wider text-white block mb-1">
                         {card.stat}
@@ -163,7 +201,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ pillars, colors, id = 'ars
 
                     <a
                       href="#apply"
-                      className="inline-flex items-center gap-1.5 text-xs font-mono tracking-wider opacity-60 group-hover:opacity-100 transition-all hover:translate-x-1"
+                      className="inline-flex shrink-0 items-center gap-1.5 text-xs font-mono tracking-wider opacity-60 group-hover:opacity-100 transition-all hover:translate-x-1"
                       style={{ color: displayColors.primary || '#E5C579' }}
                     >
                       <span className="font-semibold">ACESSAR</span>
@@ -171,7 +209,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ pillars, colors, id = 'ars
                     </a>
                   </div>
                 </SpotlightCard>
-              </m.div>
+              </div>
             );
           })}
         </div>
