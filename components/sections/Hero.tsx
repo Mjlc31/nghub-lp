@@ -160,7 +160,7 @@ export const Hero: React.FC<HeroProps> = ({
         {/* Event Badge / Scarcity Trigger */}
         <div className="reveal-text inline-flex items-center gap-3 border border-[#E5C579]/30 px-5 py-2 md:px-6 md:py-2.5 rounded-full bg-black/40 backdrop-blur-md mb-8 text-[10px] md:text-xs uppercase tracking-[0.25em] text-white/90 shadow-[0_0_20px_rgba(229,197,121,0.15)]">
            <span className="w-1.5 h-1.5 rounded-full bg-[#E5C579] animate-pulse"></span>
-           <span className="font-semibold text-[#E5C579]">{config.event?.date || '12 de Novembro'}</span>
+           <span className="font-semibold text-[#E5C579]">{config.event?.date || '10 de Novembro'}</span>
            <span className="opacity-40">•</span>
            <span>{config.event?.location || 'Maceió, AL'}</span>
            <span className="opacity-40">•</span>

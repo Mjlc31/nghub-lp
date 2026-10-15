@@ -34,15 +34,36 @@ export function sanitizeSiteConfig(raw: unknown, fallback: SiteConfig = INITIAL_
       : fallback.texts.proofBar || [],
     pillars: Array.isArray(rawTexts.pillars) && rawTexts.pillars.length > 0
       ? ((rawTexts.pillars as Array<{ title?: unknown; description?: unknown }>)
-          .filter((p) => p && typeof p === 'object' && typeof p.title === 'string' && typeof p.description === 'string') as Array<{ title: string; description: string }>)
-      : fallback.texts.pillars || []
+        .filter((p) => p && typeof p === 'object' && typeof p.title === 'string' && typeof p.description === 'string') as Array<{ title: string; description: string }>)
+      : fallback.texts.pillars || [],
+    testimonials: Array.isArray(rawTexts.testimonials)
+      ? ((rawTexts.testimonials as Array<{ quote?: unknown; name?: unknown; role?: unknown; metric?: unknown }>)
+        .filter((t) => t && typeof t === 'object' && typeof t.quote === 'string' && typeof t.name === 'string') as Array<{ quote: string; name: string; role: string; metric: string }>)
+      : fallback.texts.testimonials || [],
+    faq: Array.isArray(rawTexts.faq)
+      ? ((rawTexts.faq as Array<{ q?: unknown; a?: unknown }>)
+        .filter((f) => f && typeof f === 'object' && typeof f.q === 'string' && typeof f.a === 'string') as Array<{ q: string; a: string }>)
+      : fallback.texts.faq || []
+  };
+
+  // 1.5 Sanitize Event
+  const rawEvent = obj.event && typeof obj.event === 'object' && !Array.isArray(obj.event)
+    ? (obj.event as Record<string, unknown>)
+    : {};
+
+  const event: SiteConfig['event'] = {
+    date: typeof rawEvent.date === 'string' ? rawEvent.date : fallback.event?.date || '',
+    location: typeof rawEvent.location === 'string' ? rawEvent.location : fallback.event?.location || '',
+    venue: typeof rawEvent.venue === 'string' ? rawEvent.venue : fallback.event?.venue || '',
+    seats: typeof rawEvent.seats === 'number' ? rawEvent.seats : fallback.event?.seats || 0,
+    isoDate: typeof rawEvent.isoDate === 'string' ? rawEvent.isoDate : fallback.event?.isoDate || '',
   };
 
   // 2. Sanitize Images (Strip huge Base64 strings to enforce F17.5)
   const rawImages = obj.images && typeof obj.images === 'object' && !Array.isArray(obj.images)
     ? (obj.images as Record<string, unknown>)
     : {};
-  
+
   const sanitizeImageString = (val: unknown, fallbackVal: string): string => {
     if (typeof val !== 'string' || !val.trim()) return fallbackVal;
     // Strip Base64 strings exceeding 10KB from LocalStorage to prevent quota blowout
@@ -54,12 +75,12 @@ export function sanitizeSiteConfig(raw: unknown, fallback: SiteConfig = INITIAL_
 
   const galleryList = Array.isArray(rawImages.gallery)
     ? (rawImages.gallery
-        .filter((item: unknown) => typeof item === 'string' && (item as string).trim())
-        .map((img: unknown) => {
-          const str = img as string;
-          return str.startsWith('data:image/') && str.length > 10 * 1024 ? null : str;
-        })
-        .filter(Boolean) as string[])
+      .filter((item: unknown) => typeof item === 'string' && (item as string).trim())
+      .map((img: unknown) => {
+        const str = img as string;
+        return str.startsWith('data:image/') && str.length > 10 * 1024 ? null : str;
+      })
+      .filter(Boolean) as string[])
     : fallback.images.gallery;
 
   const images: SiteConfig['images'] = {
@@ -89,6 +110,7 @@ export function sanitizeSiteConfig(raw: unknown, fallback: SiteConfig = INITIAL_
 
   return {
     images,
+    event,
     texts,
     colors,
     integration

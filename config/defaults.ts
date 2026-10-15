@@ -14,12 +14,12 @@ export const INITIAL_CONFIG = {
         ]
     },
     event: {
-        date: "12 de Novembro",
+        date: "10 de Novembro",
         location: "Maceió, AL",
         venue: "Divina Gula",
         seats: 60,
         // Data ISO para countdown
-        isoDate: "2026-11-12T19:00:00-03:00"
+        isoDate: "2026-11-10T19:00:00-03:00"
     },
     texts: {
         heroTitle: "Você chegou aos 7 dígitos, mas está jogando o jogo sozinho. É hora de sentar na mesa certa.",

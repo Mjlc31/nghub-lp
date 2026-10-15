@@ -43,18 +43,18 @@ const CountdownUnit: React.FC<{ value: number; label: string }> = ({ value, labe
 export const Countdown: React.FC = () => {
   const { config } = useSiteConfig();
   const eventIsoDate = config.event?.isoDate;
-  const eventDate = config.event?.date || '12 de Novembro';
+  const eventDate = config.event?.date || '10 de Novembro';
   const eventVenue = config.event?.venue || 'Divina Gula';
   const eventLocation = config.event?.location || 'Maceió, AL';
   const eventSeats = config.event?.seats || 60;
 
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(
-    calculateTimeLeft(eventIsoDate || '2026-11-12T19:00:00-03:00')
+    calculateTimeLeft(eventIsoDate || '2026-11-10T19:00:00-03:00')
   );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(eventIsoDate || '2026-11-12T19:00:00-03:00'));
+      setTimeLeft(calculateTimeLeft(eventIsoDate || '2026-11-10T19:00:00-03:00'));
     }, 1000);
 
     return () => clearInterval(timer);
